@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Vieja Nevera — Pizzas al Horno</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── TOKENS ───────────────────────────────────────────── */
+    :root {
+      --cream:      #F5EDD8;
+      --cream-dark: #EBE0C6;
+      --teal:       #2F9F83;
+      --dark-teal:  #1F5F57;
+      --brown:      #7A442E;
+      --dark-brown: #2d1608;
+      --text:       #2a160a;
+      --text-mid:   #5a3520;
+      --text-light: #8a6040;
+      --amber:      #C8A43B;
+      --amber-dark: #8a6e1e;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--cream);
+      background-image:
+        linear-gradient(45deg, rgba(122,68,46,.018) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(122,68,46,.018) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(122,68,46,.018) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(122,68,46,.018) 75%);
+      background-size: 4px 4px;
+      background-position: 0 0, 0 2px, 2px -2px, -2px 0px;
+      color: var(--text);
+      font-family: 'Libre Baskerville', serif;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ──────────────────────────────────────────────── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--dark-brown);
+      border-bottom: 2px solid var(--teal);
+      padding: 0 48px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-family: 'Cinzel', serif; font-size: 17px; font-weight: 700;
+      color: var(--cream); letter-spacing: 4px; text-transform: uppercase;
+      text-decoration: none;
+    }
+
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+
+    .nav-links a {
+      font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600;
+      letter-spacing: 4px; color: rgba(245,237,216,.6); text-transform: uppercase;
+      text-decoration: none; transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--teal); }
+
+    /* ── HERO ─────────────────────────────────────────────── */
+    .hero {
+      min-height: 90vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 80px 40px;
+      position: relative; overflow: hidden;
+      background:
+        radial-gradient(ellipse 80% 55% at 50% 105%, rgba(180,80,20,.10) 0%, transparent 65%),
+        radial-gradient(ellipse 100% 70% at 50% 45%, rgba(47,159,131,.05) 0%, transparent 55%),
+        var(--cream);
+    }
+
+    .hero::before, .hero::after {
+      content: ''; position: absolute;
+      width: 220px; height: 220px;
+      border: 1px solid rgba(122,68,46,.18); pointer-events: none;
+    }
+    .hero::before { top: 40px; left: 40px; border-right: none; border-bottom: none; }
+    .hero::after  { bottom: 40px; right: 40px; border-left: none; border-top: none; }
+
+    .hero-eyebrow {
+      font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600;
+      letter-spacing: 8px; color: var(--teal); text-transform: uppercase; margin-bottom: 24px;
+    }
+
+    .hero-ornament {
+      font-size: 18px; letter-spacing: 20px; color: rgba(122,68,46,.4); margin-bottom: 28px;
+    }
+
+    .hero-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(52px, 10vw, 116px); font-weight: 900;
+      color: var(--dark-brown); letter-spacing: 4px;
+      text-transform: uppercase; line-height: 0.88; margin-bottom: 36px;
+    }
+
+    .hero-title em {
+      display: block; font-style: normal;
+      font-size: .52em; color: var(--teal); letter-spacing: 14px; margin-bottom: 8px;
+    }
+
+    .divider {
+      display: flex; align-items: center; gap: 16px;
+      justify-content: center; margin-bottom: 32px;
+    }
+    .divider-line   { width: 120px; height: 1px; background: linear-gradient(90deg, transparent, rgba(122,68,46,.35)); }
+    .divider-line.r { background: linear-gradient(270deg, transparent, rgba(122,68,46,.35)); }
+    .divider-gem    { font-size: 14px; color: rgba(122,68,46,.5); }
+
+    .hero-sub {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: clamp(17px, 2.2vw, 24px); color: var(--text-mid);
+      margin-bottom: 52px; letter-spacing: 1px;
+    }
+
+    .btn {
+      display: inline-block; font-family: 'Cinzel', serif;
+      font-size: 13px; font-weight: 600; letter-spacing: 5px; text-transform: uppercase;
+      color: var(--cream); background: var(--dark-teal);
+      padding: 16px 44px; border: 1.5px solid var(--teal);
+      text-decoration: none; transition: background .25s, letter-spacing .25s;
+    }
+    .btn:hover { background: var(--teal); letter-spacing: 7px; }
+
+    /* ── PROMO BANNER ─────────────────────────────────────── */
+    .banner {
+      background: var(--dark-teal); padding: 26px 0; overflow: hidden;
+    }
+
+    .banner-inner {
+      display: flex; width: max-content;
+      animation: marquee 30s linear infinite;
+    }
+
+    .banner-text {
+      font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600;
+      letter-spacing: 5px; color: rgba(245,237,216,.75); text-transform: uppercase;
+      white-space: nowrap; padding-right: 80px;
+    }
+    .banner-text span { color: #7ecfc0; }
+
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ── SECTIONS ─────────────────────────────────────────── */
+    .section { padding: 88px 40px; }
+
+    .section-inner { max-width: 1200px; margin: 0 auto; }
+
+    .sec-head { text-align: center; margin-bottom: 72px; }
+
+    .sec-eyebrow {
+      font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600;
+      letter-spacing: 8px; color: var(--teal); text-transform: uppercase; margin-bottom: 12px;
+    }
+
+    .sec-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(32px, 5vw, 52px); font-weight: 700;
+      color: var(--dark-brown); letter-spacing: 5px; text-transform: uppercase; margin-bottom: 14px;
+    }
+
+    .sec-rule { width: 56px; height: 2px; background: var(--teal); margin: 0 auto 14px; }
+
+    .sec-desc {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: 17px; color: var(--text-light);
+    }
+
+    /* ── MENU SECTION ─────────────────────────────────────── */
+    .menu-section { background: var(--cream-dark); }
+
+    .menu-cat { margin-bottom: 72px; }
+    .menu-cat:last-child { margin-bottom: 0; }
+
+    .cat-label-wrap {
+      display: flex; align-items: center; gap: 0; margin-bottom: 36px;
+    }
+    .cat-label-line { flex: 1; height: 1px; background: rgba(122,68,46,.22); }
+    .cat-label {
+      font-family: 'Cinzel', serif; font-size: 19px; font-weight: 700;
+      color: var(--dark-teal); letter-spacing: 6px; text-transform: uppercase;
+      padding: 8px 28px; border: 1px solid rgba(31,95,87,.3);
+      background: var(--cream-dark); white-space: nowrap;
+    }
+
+    /* ── MENU CARDS ─────────────────────────────────────────── */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .menu-card {
+      background: var(--cream); border: 1px solid rgba(122,68,46,.14);
+      overflow: hidden; position: relative;
+      transition: box-shadow .22s, transform .22s; cursor: default;
+    }
+    .menu-card:hover {
+      box-shadow: 0 8px 32px rgba(61,31,10,.12); transform: translateY(-4px);
+    }
+
+    /* image block */
+    .card-img {
+      width: 100%; height: 180px;
+      overflow: hidden; position: relative;
+    }
+
+    .card-img img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+      transition: transform .55s ease;
+    }
+
+    .menu-card:hover .card-img img { transform: scale(1.07); }
+
+    /* fallback gradient backgrounds (shown while image loads or on error) */
+    .card-img.clasica  { background: linear-gradient(135deg, #EDD5A3, #D9BD88); }
+    .card-img.especial { background: linear-gradient(135deg, #C8DFCC, #A8C8B0); }
+    .card-img.casa     { background: linear-gradient(135deg, #D4C4A0, #BCA87C); }
+    .card-img.pinguino { background: linear-gradient(135deg, #1a3035, #0d2028); }
+    .card-img.trago    { background: linear-gradient(135deg, #3d2a08, #251808); }
+    .card-img.cerveza  { background: linear-gradient(135deg, rgba(200,164,59,.2), #EDD5A3); }
+    .card-img.sinAlc   { background: linear-gradient(135deg, #C8DFE0, #A8C8C8); }
+
+    /* inner frame overlay */
+    .card-body {
+      padding: 20px 24px 22px;
+      position: relative;
+    }
+    .card-body::before {
+      content: ''; position: absolute;
+      inset: 4px 4px 4px 4px;
+      border: 1px solid rgba(122,68,46,.06);
+      pointer-events: none;
+    }
+
+    .card-top {
+      display: flex; align-items: flex-start; gap: 6px; margin-bottom: 8px;
+    }
+
+    .card-name {
+      font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700;
+      color: var(--dark-brown); letter-spacing: 1px; text-transform: uppercase;
+      flex: 1; line-height: 1.3;
+    }
+
+    .card-dots {
+      flex: 1; border-bottom: 2px dotted rgba(122,68,46,.2);
+      height: 14px; margin: 0 4px; min-width: 12px; flex-shrink: 1;
+    }
+
+    .card-price {
+      font-family: 'Cinzel', serif; font-size: 17px; font-weight: 700;
+      color: var(--teal); letter-spacing: 1px; white-space: nowrap; flex-shrink: 0;
+    }
+
+    .card-price.amber { color: var(--amber); }
+
+    .card-desc {
+      font-family: 'Libre Baskerville', serif; font-style: italic;
+      font-size: 12.5px; color: var(--text-light); line-height: 1.55;
+    }
+
+    /* ── TRAGOS SECTION ───────────────────────────────────── */
+    .tragos-section {
+      background: var(--dark-brown);
+    }
+
+    .tragos-section .sec-title   { color: var(--cream); }
+    .tragos-section .sec-desc    { color: rgba(245,237,216,.5); }
+    .tragos-section .cat-label   { color: var(--amber); border-color: rgba(200,164,59,.3); background: var(--dark-brown); }
+    .tragos-section .cat-label-line { background: rgba(200,164,59,.2); }
+
+    .tragos-section .menu-cat    { margin-bottom: 64px; }
+
+    .tragos-section .menu-card   {
+      background: #3d1e0a; border-color: rgba(200,164,59,.15);
+    }
+    .tragos-section .menu-card:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    }
+
+    .tragos-section .card-name   { color: var(--cream); }
+    .tragos-section .card-desc   { color: rgba(245,237,216,.45); }
+    .tragos-section .card-body::before { border-color: rgba(200,164,59,.05); }
+
+    /* ── ABOUT ────────────────────────────────────────────── */
+    .about-section {
+      background: #1a0c04; padding: 88px 40px; text-align: center; position: relative; overflow: hidden;
+    }
+    .about-section::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(47,159,131,.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .about-inner { max-width: 640px; margin: 0 auto; position: relative; }
+
+    .about-tag {
+      font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600;
+      letter-spacing: 8px; color: var(--teal); text-transform: uppercase; margin-bottom: 20px;
+    }
+
+    .about-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(30px, 4vw, 44px); font-weight: 700;
+      color: var(--cream); letter-spacing: 4px; text-transform: uppercase; margin-bottom: 24px;
+    }
+
+    .about-rule { width: 50px; height: 2px; background: var(--teal); margin: 0 auto 28px; }
+
+    .about-text {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: 19px; color: rgba(245,237,216,.65); line-height: 1.75;
+    }
+
+    /* ── FOOTER ───────────────────────────────────────────── */
+    .footer {
+      background: #0f0703; border-top: 2px solid var(--teal);
+      padding: 52px 40px; text-align: center;
+    }
+
+    .footer-brand {
+      font-family: 'Cinzel', serif; font-size: 26px; font-weight: 900;
+      color: var(--cream); letter-spacing: 10px; text-transform: uppercase; margin-bottom: 10px;
+    }
+
+    .footer-sub {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: 15px; color: rgba(245,237,216,.45); margin-bottom: 28px;
+    }
+
+    .footer-rule { width: 48px; height: 1px; background: rgba(47,159,131,.4); margin: 0 auto 24px; }
+
+    .footer-copy {
+      font-family: 'Montserrat', sans-serif; font-size: 10px;
+      letter-spacing: 3px; color: rgba(245,237,216,.25); text-transform: uppercase;
+    }
+
+    /* ── RESPONSIVE ───────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .nav-links { display: none; }
+      .nav       { padding: 0 24px; }
+      .hero      { min-height: 85vh; padding: 60px 24px; }
+      .hero::before, .hero::after { display: none; }
+      .hero-title em { letter-spacing: 8px; }
+      .section   { padding: 60px 20px; }
+      .about-section { padding: 60px 24px; }
+      .menu-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+      .cat-label-line { display: none; }
+      .cat-label-wrap { justify-content: center; }
+      .banner    { padding: 20px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" role="navigation">
+    <a class="nav-brand" href="#inicio">La Vieja Nevera</a>
+    <ul class="nav-links">
+      <li><a href="#pizzas">Pizzas</a></li>
+      <li><a href="#tragos">Tragos</a></li>
+      <li><a href="#nosotros">Nosotros</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <p class="hero-eyebrow">Pizzería &amp; Bar Artesanal</p>
+    <div class="hero-ornament">── ✦ ──</div>
+    <h1 class="hero-title">
+      <em>La Vieja</em>
+      Nevera
+    </h1>
+    <div class="divider">
+      <span class="divider-line"></span>
+      <span class="divider-gem">◆</span>
+      <span class="divider-line r"></span>
+    </div>
+    <p class="hero-sub">Pizzas al Horno · Carta de Tragos · Hechas en el Momento</p>
+    <a href="#pizzas" class="btn">Ver el Menú</a>
+  </section>
+
+  <!-- PROMO BANNER -->
+  <div class="banner">
+    <div class="banner-inner">
+      <span class="banner-text">
+        Pizzas al Horno <span>·</span> Hechas en el Momento <span>·</span>
+        Carta de Tragos <span>·</span> Cervezas Bien Frías <span>·</span>
+        Pingüino de Fernet <span>·</span> La Vieja Nevera <span>·</span>
+        Pizzas al Horno <span>·</span> Hechas en el Momento <span>·</span>
+        Carta de Tragos <span>·</span> Cervezas Bien Frías <span>·</span>
+        Pingüino de Fernet <span>·</span> La Vieja Nevera <span>·</span>
+      </span>
+      <span class="banner-text" aria-hidden="true">
+        Pizzas al Horno <span>·</span> Hechas en el Momento <span>·</span>
+        Carta de Tragos <span>·</span> Cervezas Bien Frías <span>·</span>
+        Pingüino de Fernet <span>·</span> La Vieja Nevera <span>·</span>
+        Pizzas al Horno <span>·</span> Hechas en el Momento <span>·</span>
+        Carta de Tragos <span>·</span> Cervezas Bien Frías <span>·</span>
+        Pingüino de Fernet <span>·</span> La Vieja Nevera <span>·</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- ═══════ PIZZAS ═══════ -->
+  <section class="section menu-section" id="pizzas">
+    <div class="section-inner">
+      <header class="sec-head">
+        <div class="sec-eyebrow">✦ &nbsp; Nuestro &nbsp; ✦</div>
+        <h2 class="sec-title">Menú de Pizzas</h2>
+        <div class="sec-rule"></div>
+        <p class="sec-desc">Pizzas al horno, hechas en el momento</p>
+      </header>
+
+      <!-- CLÁSICAS -->
+      <div class="menu-cat">
+        <div class="cat-label-wrap">
+          <span class="cat-label-line"></span>
+          <span class="cat-label">Clásicas</span>
+          <span class="cat-label-line"></span>
+        </div>
+        <div class="menu-grid">
+
+          <div class="menu-card">
+            <div class="card-img clasica"><img src="https://images.unsplash.com/photo-MqT0asuoIcU?w=400&h=220&fit=crop&auto=format&q=75" alt="Muzzarella" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Muzzarella</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$15.000</span>
+              </div>
+              <p class="card-desc">Salsa de tomate · muzzarella · orégano</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img clasica"><img src="https://images.unsplash.com/photo-SU1LFoeEUkk?w=400&h=220&fit=crop&auto=format&q=75" alt="Pepperoni" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Pepperoni</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$20.000</span>
+              </div>
+              <p class="card-desc">Muzzarella · pepperoni crocante</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img clasica"><img src="https://images.unsplash.com/photo-D3Mag4BKqns?w=400&h=220&fit=crop&auto=format&q=75" alt="Parmesano" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Parmesano</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$20.000</span>
+              </div>
+              <p class="card-desc">Muzzarella · queso parmesano</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ESPECIALES -->
+      <div class="menu-cat">
+        <div class="cat-label-wrap">
+          <span class="cat-label-line"></span>
+          <span class="cat-label">Especiales</span>
+          <span class="cat-label-line"></span>
+        </div>
+        <div class="menu-grid">
+
+          <div class="menu-card">
+            <div class="card-img especial"><img src="https://images.unsplash.com/photo-Oxb84ENcFfU?w=400&h=220&fit=crop&auto=format&q=75" alt="Cherrys" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Cherrys</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$20.000</span>
+              </div>
+              <p class="card-desc">Muzzarella · tomates cherry · oliva</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img especial"><img src="https://images.unsplash.com/photo-40OJLYVWeeM?w=400&h=220&fit=crop&auto=format&q=75" alt="Morrón y Jamón" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Morrón y Jamón</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$20.000</span>
+              </div>
+              <p class="card-desc">Muzzarella · jamón · morrones asados</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img especial"><img src="https://images.unsplash.com/photo-xIqVfW8XUt4?w=400&h=220&fit=crop&auto=format&q=75" alt="Panceta" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Panceta</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$20.000</span>
+              </div>
+              <p class="card-desc">Muzzarella · panceta dorada</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img especial"><img src="https://images.unsplash.com/photo-H5Z8wovS9ic?w=400&h=220&fit=crop&auto=format&q=75" alt="Champiñones" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Champiñones</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$20.000</span>
+              </div>
+              <p class="card-desc">Muzzarella · champiñones salteados</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img especial"><img src="https://images.unsplash.com/photo-x00CzBt4Dfk?w=400&h=220&fit=crop&auto=format&q=75" alt="Carne" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Carne</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$20.000</span>
+              </div>
+              <p class="card-desc">Muzzarella · carne sazonada</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DE LA CASA -->
+      <div class="menu-cat">
+        <div class="cat-label-wrap">
+          <span class="cat-label-line"></span>
+          <span class="cat-label">De la Casa</span>
+          <span class="cat-label-line"></span>
+        </div>
+        <div class="menu-grid">
+
+          <div class="menu-card">
+            <div class="card-img casa"><img src="https://images.unsplash.com/photo-QI32uJ52aOo?w=400&h=220&fit=crop&auto=format&q=75" alt="Roquefort y Jamón" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Roquefort y Jamón</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$20.000</span>
+              </div>
+              <p class="card-desc">Muzzarella · jamón · roquefort</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img casa"><img src="https://images.unsplash.com/photo-MQUqbmszGGM?w=400&h=220&fit=crop&auto=format&q=75" alt="Pollo y Barbacoa" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Pollo y Barbacoa</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$20.000</span>
+              </div>
+              <p class="card-desc">Muzzarella · pollo · salsa barbacoa</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img casa"><img src="https://images.unsplash.com/photo-exSEmuA7R7k?w=400&h=220&fit=crop&auto=format&q=75" alt="Fugazzetta" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Fugazzetta</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$20.000</span>
+              </div>
+              <p class="card-desc">Rellena de muzzarella y/c cebolla por arriba</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img casa"><img src="https://images.unsplash.com/photo-5B476qR_PzY?w=400&h=220&fit=crop&auto=format&q=75" alt="Fugazzetta Rellena" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Fugazzetta Rellena</span>
+                <span class="card-dots"></span>
+                <span class="card-price">$20.000</span>
+              </div>
+              <p class="card-desc">Jamón y queso · cebolla por arriba</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ TRAGOS ═══════ -->
+  <section class="section tragos-section" id="tragos">
+    <div class="section-inner">
+      <header class="sec-head">
+        <div class="sec-eyebrow">✦ &nbsp; Para Tomar &nbsp; ✦</div>
+        <h2 class="sec-title">Carta de Tragos</h2>
+        <div class="sec-rule" style="background:var(--amber)"></div>
+        <p class="sec-desc">Tragos, cervezas y bebidas sin alcohol</p>
+      </header>
+
+      <!-- PINGÜINO -->
+      <div class="menu-cat">
+        <div class="cat-label-wrap">
+          <span class="cat-label-line"></span>
+          <span class="cat-label">Pingüino</span>
+          <span class="cat-label-line"></span>
+        </div>
+        <div class="menu-grid">
+
+          <div class="menu-card">
+            <div class="card-img pinguino"><img src="https://images.unsplash.com/photo-y8clParIaOE?w=400&h=220&fit=crop&auto=format&q=75" alt="Fernet Pingüino" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Fernet Pingüino</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$20.000</span>
+              </div>
+              <p class="card-desc">Fernet con Coca Cola · jarra para compartir</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img pinguino"><img src="https://images.unsplash.com/photo-gA81ZTsql68?w=400&h=220&fit=crop&auto=format&q=75" alt="Vermouth Pingüino" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Vermouth Pingüino</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$18.000</span>
+              </div>
+              <p class="card-desc">Vermouth · jarra para compartir</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TRAGOS -->
+      <div class="menu-cat">
+        <div class="cat-label-wrap">
+          <span class="cat-label-line"></span>
+          <span class="cat-label">Tragos</span>
+          <span class="cat-label-line"></span>
+        </div>
+        <div class="menu-grid">
+
+          <div class="menu-card">
+            <div class="card-img trago"><img src="https://images.unsplash.com/photo-0qkb5mfe68M?w=400&h=220&fit=crop&auto=format&q=75" alt="Gin" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Gin</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$8.000</span>
+              </div>
+              <p class="card-desc">Copa individual</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img trago"><img src="https://images.unsplash.com/photo-dmkmrNptMpw?w=400&h=220&fit=crop&auto=format&q=75" alt="Fernet" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Fernet</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$8.000</span>
+              </div>
+              <p class="card-desc">Copa individual</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img trago"><img src="https://images.unsplash.com/photo-UyF3Tal_KXw?w=400&h=220&fit=crop&auto=format&q=75" alt="Jäger" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Jäger</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$10.000</span>
+              </div>
+              <p class="card-desc">Copa individual</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img trago"><img src="https://images.unsplash.com/photo-TSkUCyCuVH4?w=400&h=220&fit=crop&auto=format&q=75" alt="Vodka" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Vodka</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$6.000</span>
+              </div>
+              <p class="card-desc">Copa individual</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- CERVEZAS -->
+      <div class="menu-cat">
+        <div class="cat-label-wrap">
+          <span class="cat-label-line"></span>
+          <span class="cat-label">Cervezas</span>
+          <span class="cat-label-line"></span>
+        </div>
+        <div class="menu-grid">
+
+          <div class="menu-card">
+            <div class="card-img cerveza"><img src="https://images.unsplash.com/photo-Lq1rOaigDoY?w=400&h=220&fit=crop&auto=format&q=75" alt="Porrón Corona" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Porrón Corona / Heineken</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$7.000</span>
+              </div>
+              <p class="card-desc">330 ml · bien fría</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img cerveza"><img src="https://images.unsplash.com/photo-3ORoQEJY9LA?w=400&h=220&fit=crop&auto=format&q=75" alt="Corona 710" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Corona 710</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$12.000</span>
+              </div>
+              <p class="card-desc">710 ml · bien fría</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SIN ALCOHOL -->
+      <div class="menu-cat">
+        <div class="cat-label-wrap">
+          <span class="cat-label-line"></span>
+          <span class="cat-label">Sin Alcohol</span>
+          <span class="cat-label-line"></span>
+        </div>
+        <div class="menu-grid">
+
+          <div class="menu-card">
+            <div class="card-img sinAlc"><img src="https://images.unsplash.com/photo-Qy2KMPRV3X4?w=400&h=220&fit=crop&auto=format&q=75" alt="Lata Gaseosa" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Lata Gaseosa</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$3.000</span>
+              </div>
+              <p class="card-desc">Coca-Cola, Sprite, Fanta</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img sinAlc"><img src="https://images.unsplash.com/photo-xBFTjrMIC0c?w=400&h=220&fit=crop&auto=format&q=75" alt="Lata Speed" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Lata Speed</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$5.000</span>
+              </div>
+              <p class="card-desc">Energizante</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img sinAlc"><img src="https://images.unsplash.com/photo-Qh60WfqX-vA?w=400&h=220&fit=crop&auto=format&q=75" alt="Red Bull" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Lata Red Bull</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$7.000</span>
+              </div>
+              <p class="card-desc">Energizante</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img sinAlc"><img src="https://images.unsplash.com/photo-E-ABv5hArGU?w=400&h=220&fit=crop&auto=format&q=75" alt="Agua" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Agua</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$3.000</span>
+              </div>
+              <p class="card-desc">Agua mineral</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img sinAlc"><img src="https://images.unsplash.com/photo-Qh60WfqX-vA?w=400&h=220&fit=crop&auto=format&q=75" alt="Sifón" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Sifón</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$3.000</span>
+              </div>
+              <p class="card-desc">Soda gasificada</p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img sinAlc"><img src="https://images.unsplash.com/photo-Qy2KMPRV3X4?w=400&h=220&fit=crop&auto=format&q=75" alt="Coca Cola 1.25" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Coca Cola 1.25 L</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$8.000</span>
+              </div>
+              <p class="card-desc"></p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img sinAlc"><img src="https://images.unsplash.com/photo-daMT4OR3Eac?w=400&h=220&fit=crop&auto=format&q=75" alt="Coca Cola 1.75" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Coca Cola 1.75 L</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$12.000</span>
+              </div>
+              <p class="card-desc"></p>
+            </div>
+          </div>
+
+          <div class="menu-card">
+            <div class="card-img sinAlc"><img src="https://images.unsplash.com/photo-Lq1rOaigDoY?w=400&h=220&fit=crop&auto=format&q=75" alt="Corona Cero" loading="lazy"></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="card-name">Corona Cero</span>
+                <span class="card-dots"></span>
+                <span class="card-price amber">$7.000</span>
+              </div>
+              <p class="card-desc">Sin alcohol · 330 ml</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about-section" id="nosotros">
+    <div class="about-inner">
+      <div class="about-tag">✦ &nbsp; Nuestra historia &nbsp; ✦</div>
+      <h2 class="about-title">La Vieja Nevera</h2>
+      <div class="about-rule"></div>
+      <p class="about-text">
+        Pizzas artesanales al horno y una carta de tragos para cada gusto.
+        Cada pizza se hace en el momento, con ingredientes frescos y la
+        tradición de la verdadera pizza porteña.
+      </p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-brand">La Vieja Nevera</div>
+    <div class="footer-sub">Pizzas al Horno · Carta de Tragos · Hechas en el Momento</div>
+    <div class="footer-rule"></div>
+    <div class="footer-copy">Pizzería &amp; Bar Artesanal &nbsp;·&nbsp; Todos los derechos reservados</div>
+  </footer>
+
+</body>
+</html>

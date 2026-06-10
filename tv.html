@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>La Vieja Nevera — Menú Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;1,400&family=Libre+Baskerville:ital,wght@0,400;1,400&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream:  #F2E8D0;
+      --teal:   #2F9F83;
+      --amber:  #C8A43B;
+      --bg:     #0a0603;
+      --card-bg:#14090400;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    html, body {
+      width:100%; height:100%;
+      background:#000; overflow:hidden;
+    }
+
+    /* ── SCREEN ─────────────────────────────────────────────── */
+    .screen {
+      width:1920px; height:1080px;
+      transform-origin:top left;
+      display:flex; flex-direction:column;
+      background: var(--bg);
+      background-image: radial-gradient(ellipse 100% 60% at 50% 0%, #1f1208 0%, var(--bg) 55%);
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    .header {
+      height:108px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 60px; position:relative; z-index:10;
+    }
+    .header::after {
+      content:''; position:absolute; bottom:0; left:60px; right:60px; height:1px;
+      background:linear-gradient(90deg, transparent, var(--teal) 15%, var(--teal) 85%, transparent);
+    }
+
+    .brand { text-align:center; flex:1; }
+    .brand-pre {
+      font-family:'Montserrat',sans-serif; font-size:12px; font-weight:600;
+      letter-spacing:12px; color:var(--teal); text-transform:uppercase;
+      margin-bottom:6px; opacity:.8;
+    }
+    .brand-name {
+      font-family:'Cinzel',serif; font-size:56px; font-weight:900;
+      color:var(--cream); letter-spacing:16px; text-transform:uppercase; line-height:1;
+    }
+
+    /* slide category badge (top-right corner) */
+    .hdr-badge {
+      font-family:'Cinzel',serif; font-size:15px; font-weight:700;
+      color:var(--teal); letter-spacing:5px; text-transform:uppercase;
+      border:1px solid rgba(47,159,131,.3); padding:8px 20px;
+      opacity:0; transition:opacity .6s; white-space:nowrap;
+    }
+    .hdr-badge.show { opacity:1; }
+    .hdr-badge.amber { color:var(--amber); border-color:rgba(200,164,59,.3); }
+
+    /* ── SLIDES ─────────────────────────────────────────────── */
+    .slides { flex:1; position:relative; overflow:hidden; }
+
+    .slide {
+      position:absolute; inset:0;
+      opacity:0; transition:opacity 1.4s ease-in-out;
+      display:flex; flex-direction:column;
+      padding:20px 60px 16px; pointer-events:none;
+    }
+    .slide.active { opacity:1; pointer-events:auto; }
+
+    /* ── SLIDE HEADER ───────────────────────────────────────── */
+    .s-head {
+      flex-shrink:0; height:68px;
+      display:flex; align-items:flex-end; gap:20px; margin-bottom:18px;
+    }
+    .s-head-text {}
+    .s-eyebrow {
+      font-family:'Montserrat',sans-serif; font-size:12px; font-weight:600;
+      letter-spacing:7px; color:var(--teal); text-transform:uppercase;
+      margin-bottom:4px;
+    }
+    .s-eyebrow.amber { color:var(--amber); }
+    .s-title {
+      font-family:'Cinzel',serif; font-size:42px; font-weight:700;
+      color:var(--cream); letter-spacing:5px; text-transform:uppercase; line-height:1;
+    }
+    .s-line { flex:1; height:1px; background:rgba(255,255,255,.07); margin-bottom:8px; }
+
+    /* ── CARD LAYOUTS ───────────────────────────────────────── */
+    /* flex row of equal cards */
+    .c-row { flex:1; display:flex; gap:14px; }
+
+    /* 2-row layout */
+    .c-rows { flex:1; display:flex; flex-direction:column; gap:14px; }
+    .c-rows .c-row { flex:1; }
+
+    /* ── ITEM CARD ──────────────────────────────────────────── */
+    .card {
+      flex:1; position:relative; overflow:hidden;
+      border:1px solid rgba(255,255,255,.05); border-radius:2px;
+      background:#1a0f07; /* fallback if photo fails */
+    }
+
+    .card-photo {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover; display:block;
+      transition:transform 12s ease;
+    }
+
+    /* subtle zoom on active slide */
+    .slide.active .card-photo { transform:scale(1.04); }
+
+    /* gradient overlay */
+    .card-ov {
+      position:absolute; bottom:0; left:0; right:0;
+      padding:55px 22px 20px;
+      background:linear-gradient(0deg, rgba(0,0,0,.93) 0%, rgba(0,0,0,.55) 45%, transparent 100%);
+    }
+
+    /* optional top-left badge */
+    .card-tag {
+      position:absolute; top:14px; left:14px;
+      font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700;
+      letter-spacing:4px; text-transform:uppercase; color:#fff;
+      background:var(--teal); padding:5px 12px;
+    }
+    .card-tag.amber { background:var(--amber); }
+
+    .card-name {
+      font-family:'Cinzel',serif; font-weight:700; text-transform:uppercase;
+      color:#fff; letter-spacing:1px; margin-bottom:8px; line-height:1.1;
+    }
+    /* size variants — set by parent layout */
+    .size-lg  .card-name { font-size:30px; }
+    .size-md  .card-name { font-size:24px; }
+    .size-sm  .card-name { font-size:20px; }
+
+    .card-bot { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; }
+
+    .card-desc {
+      font-family:'Libre Baskerville',serif; font-style:italic;
+      color:rgba(255,255,255,.5); line-height:1.35; flex:1;
+    }
+    .size-lg  .card-desc { font-size:15px; }
+    .size-md  .card-desc { font-size:13px; }
+    .size-sm  .card-desc { font-size:12px; }
+
+    .card-price {
+      font-family:'Cinzel',serif; font-weight:900;
+      color:var(--teal); letter-spacing:1px; white-space:nowrap; flex-shrink:0;
+    }
+    .card-price.amber { color:var(--amber); }
+    .size-lg  .card-price { font-size:36px; }
+    .size-md  .card-price { font-size:28px; }
+    .size-sm  .card-price { font-size:24px; }
+
+    /* ── WELCOME SLIDE ──────────────────────────────────────── */
+    .slide-welcome { padding:0; }
+
+    .w-photo {
+      position:absolute; inset:0; width:100%; height:100%;
+      object-fit:cover; opacity:.35; transform:scale(1.05);
+    }
+
+    .w-cnt {
+      position:relative; z-index:2;
+      flex:1; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; text-align:center;
+      padding:40px;
+    }
+
+    .w-eyebrow {
+      font-family:'Montserrat',sans-serif; font-size:14px; font-weight:600;
+      letter-spacing:10px; color:var(--teal); text-transform:uppercase; margin-bottom:28px;
+    }
+
+    .w-title {
+      font-family:'Cinzel',serif; font-size:100px; font-weight:900;
+      color:var(--cream); letter-spacing:6px; text-transform:uppercase;
+      line-height:.9; margin-bottom:48px;
+      text-shadow:0 4px 40px rgba(0,0,0,.8);
+    }
+
+    .w-rule {
+      width:520px; height:1px; margin:0 auto 44px;
+      background:linear-gradient(90deg, transparent, var(--teal) 25%, var(--teal) 75%, transparent);
+    }
+
+    .w-sub {
+      font-family:'Playfair Display',serif; font-style:italic;
+      font-size:34px; color:rgba(242,232,208,.65); letter-spacing:2px;
+    }
+
+    /* ── PROGRESS + DOTS + FOOTER ───────────────────────────── */
+    .progress-track {
+      position:absolute; bottom:52px; left:0; right:0;
+      height:2px; background:rgba(255,255,255,.04); z-index:20;
+    }
+    .progress-fill { height:100%; background:var(--teal); width:0%; }
+
+    .dots {
+      position:absolute; bottom:62px; right:60px;
+      display:flex; gap:10px; z-index:20;
+    }
+    .dot {
+      width:8px; height:8px; border-radius:50%;
+      background:rgba(242,232,208,.2); transition:background .4s;
+    }
+    .dot.on { background:var(--teal); }
+
+    .footer {
+      height:52px; flex-shrink:0;
+      display:flex; align-items:center; overflow:hidden;
+      position:relative; z-index:10;
+    }
+    .footer::before {
+      content:''; position:absolute; top:0; left:60px; right:60px; height:1px;
+      background:linear-gradient(90deg, transparent 0%, var(--teal) 15%, var(--teal) 85%, transparent 100%);
+    }
+    .ticker {
+      display:flex; width:max-content;
+      animation:ticker 48s linear infinite; white-space:nowrap;
+    }
+    .ticker-seg {
+      font-family:'Montserrat',sans-serif; font-size:14px; font-weight:500;
+      letter-spacing:6px; color:rgba(47,159,131,.7); text-transform:uppercase;
+    }
+    @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+  </style>
+</head>
+<body>
+<div class="screen" id="screen">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div style="width:220px;"></div>
+    <div class="brand">
+      <div class="brand-pre">✦ &nbsp; Bienvenidos &nbsp; ✦</div>
+      <div class="brand-name">La Vieja Nevera</div>
+    </div>
+    <div class="hdr-badge" id="hdrBadge"></div>
+  </header>
+
+  <main class="slides">
+
+    <!-- ──────────────────────────────────────────────────────
+         SLIDE 0 · WELCOME
+    ─────────────────────────────────────────────────────── -->
+    <div class="slide slide-welcome active" data-badge="" data-badge-class="">
+      <img class="w-photo"
+           src="https://images.unsplash.com/photo-amYCy53AOSU?w=1920&h=900&fit=crop&auto=format&q=55"
+           alt="">
+      <div class="w-cnt">
+        <div class="w-eyebrow">✦ &nbsp; Pizzas &amp; Tragos Artesanales &nbsp; ✦</div>
+        <div class="w-title">La Vieja<br>Nevera</div>
+        <div class="w-rule"></div>
+        <div class="w-sub">Pizzas al Horno · Hechas en el Momento</div>
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────
+         SLIDE 1 · CLÁSICAS (3 tarjetas grandes)
+    ─────────────────────────────────────────────────────── -->
+    <div class="slide" data-badge="Pizzas — Clásicas" data-badge-class="">
+      <div class="s-head">
+        <div class="s-head-text">
+          <div class="s-eyebrow">✦ &nbsp; Pizzas &nbsp; ✦</div>
+          <div class="s-title">Clásicas</div>
+        </div>
+        <div class="s-line"></div>
+      </div>
+      <div class="c-row">
+
+        <div class="card size-lg">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-MqT0asuoIcU?w=640&h=780&fit=crop&auto=format&q=80"
+               alt="Muzzarella">
+          <div class="card-ov">
+            <div class="card-name">Muzzarella</div>
+            <div class="card-bot">
+              <div class="card-desc">Salsa de tomate · muzzarella · orégano</div>
+              <div class="card-price">$15.000</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card size-lg">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-SU1LFoeEUkk?w=640&h=780&fit=crop&auto=format&q=80"
+               alt="Pepperoni">
+          <div class="card-ov">
+            <div class="card-name">Pepperoni</div>
+            <div class="card-bot">
+              <div class="card-desc">Muzzarella · pepperoni crocante</div>
+              <div class="card-price">$20.000</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card size-lg">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-D3Mag4BKqns?w=640&h=780&fit=crop&auto=format&q=80"
+               alt="Parmesano">
+          <div class="card-ov">
+            <div class="card-name">Parmesano</div>
+            <div class="card-bot">
+              <div class="card-desc">Muzzarella · queso parmesano</div>
+              <div class="card-price">$20.000</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────
+         SLIDE 2 · ESPECIALES (3 arriba + 2 abajo)
+    ─────────────────────────────────────────────────────── -->
+    <div class="slide" data-badge="Pizzas — Especiales" data-badge-class="">
+      <div class="s-head">
+        <div class="s-head-text">
+          <div class="s-eyebrow">✦ &nbsp; Pizzas &nbsp; ✦</div>
+          <div class="s-title">Especiales</div>
+        </div>
+        <div class="s-line"></div>
+      </div>
+      <div class="c-rows">
+        <div class="c-row">
+          <div class="card size-md">
+            <img class="card-photo"
+                 src="https://images.unsplash.com/photo-Oxb84ENcFfU?w=640&h=380&fit=crop&auto=format&q=80"
+                 alt="Cherrys">
+            <div class="card-ov">
+              <div class="card-name">Cherrys</div>
+              <div class="card-bot">
+                <div class="card-desc">Muzzarella · tomates cherry · oliva</div>
+                <div class="card-price">$20.000</div>
+              </div>
+            </div>
+          </div>
+          <div class="card size-md">
+            <img class="card-photo"
+                 src="https://images.unsplash.com/photo-40OJLYVWeeM?w=640&h=380&fit=crop&auto=format&q=80"
+                 alt="Morrón y Jamón">
+            <div class="card-ov">
+              <div class="card-name">Morrón y Jamón</div>
+              <div class="card-bot">
+                <div class="card-desc">Muzzarella · jamón · morrones asados</div>
+                <div class="card-price">$20.000</div>
+              </div>
+            </div>
+          </div>
+          <div class="card size-md">
+            <img class="card-photo"
+                 src="https://images.unsplash.com/photo-xIqVfW8XUt4?w=640&h=380&fit=crop&auto=format&q=80"
+                 alt="Panceta">
+            <div class="card-ov">
+              <div class="card-name">Panceta</div>
+              <div class="card-bot">
+                <div class="card-desc">Muzzarella · panceta dorada</div>
+                <div class="card-price">$20.000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="c-row">
+          <div class="card size-md">
+            <img class="card-photo"
+                 src="https://images.unsplash.com/photo-H5Z8wovS9ic?w=960&h=380&fit=crop&auto=format&q=80"
+                 alt="Champiñones">
+            <div class="card-ov">
+              <div class="card-name">Champiñones</div>
+              <div class="card-bot">
+                <div class="card-desc">Muzzarella · champiñones salteados</div>
+                <div class="card-price">$20.000</div>
+              </div>
+            </div>
+          </div>
+          <div class="card size-md">
+            <img class="card-photo"
+                 src="https://images.unsplash.com/photo-x00CzBt4Dfk?w=960&h=380&fit=crop&auto=format&q=80"
+                 alt="Carne">
+            <div class="card-ov">
+              <div class="card-name">Carne</div>
+              <div class="card-bot">
+                <div class="card-desc">Muzzarella · carne sazonada</div>
+                <div class="card-price">$20.000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────
+         SLIDE 3 · DE LA CASA (4 tarjetas)
+    ─────────────────────────────────────────────────────── -->
+    <div class="slide" data-badge="De la Casa" data-badge-class="">
+      <div class="s-head">
+        <div class="s-head-text">
+          <div class="s-eyebrow">✦ &nbsp; Nuestras Favoritas &nbsp; ✦</div>
+          <div class="s-title">De la Casa</div>
+        </div>
+        <div class="s-line"></div>
+      </div>
+      <div class="c-row">
+
+        <div class="card size-lg">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-QI32uJ52aOo?w=500&h=780&fit=crop&auto=format&q=80"
+               alt="Roquefort y Jamón">
+          <div class="card-ov">
+            <div class="card-name">Roquefort y Jamón</div>
+            <div class="card-bot">
+              <div class="card-desc">Muzzarella · jamón · roquefort</div>
+              <div class="card-price">$20.000</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card size-lg">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-MQUqbmszGGM?w=500&h=780&fit=crop&auto=format&q=80"
+               alt="Pollo y Barbacoa">
+          <div class="card-ov">
+            <div class="card-name">Pollo y Barbacoa</div>
+            <div class="card-bot">
+              <div class="card-desc">Muzzarella · pollo · salsa barbacoa</div>
+              <div class="card-price">$20.000</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card size-lg">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-exSEmuA7R7k?w=500&h=780&fit=crop&auto=format&q=80"
+               alt="Fugazzetta">
+          <div class="card-ov">
+            <div class="card-name">Fugazzetta</div>
+            <div class="card-bot">
+              <div class="card-desc">Rellena de muzzarella y/c cebolla por arriba</div>
+              <div class="card-price">$20.000</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card size-lg">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-5B476qR_PzY?w=500&h=780&fit=crop&auto=format&q=80"
+               alt="Fugazzetta Rellena">
+          <div class="card-ov">
+            <div class="card-name">Fugazzetta Rellena</div>
+            <div class="card-bot">
+              <div class="card-desc">Jamón y queso · cebolla por arriba</div>
+              <div class="card-price">$20.000</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────
+         SLIDE 4 · TRAGOS (2 filas × 3)
+    ─────────────────────────────────────────────────────── -->
+    <div class="slide" data-badge="Carta de Tragos" data-badge-class="amber">
+      <div class="s-head">
+        <div class="s-head-text">
+          <div class="s-eyebrow amber">✦ &nbsp; Para Tomar &nbsp; ✦</div>
+          <div class="s-title">Carta de Tragos</div>
+        </div>
+        <div class="s-line"></div>
+      </div>
+      <div class="c-rows">
+        <div class="c-row">
+          <div class="card size-md">
+            <img class="card-photo"
+                 src="https://images.unsplash.com/photo-y8clParIaOE?w=640&h=380&fit=crop&auto=format&q=80"
+                 alt="Fernet Pingüino">
+            <div class="card-tag amber">Pingüino</div>
+            <div class="card-ov">
+              <div class="card-name">Fernet</div>
+              <div class="card-bot">
+                <div class="card-desc">Jarra para compartir con Coca Cola</div>
+                <div class="card-price amber">$20.000</div>
+              </div>
+            </div>
+          </div>
+          <div class="card size-md">
+            <img class="card-photo"
+                 src="https://images.unsplash.com/photo-gA81ZTsql68?w=640&h=380&fit=crop&auto=format&q=80"
+                 alt="Vermouth Pingüino">
+            <div class="card-tag amber">Pingüino</div>
+            <div class="card-ov">
+              <div class="card-name">Vermouth</div>
+              <div class="card-bot">
+                <div class="card-desc">Vermouth · jarra para compartir</div>
+                <div class="card-price amber">$18.000</div>
+              </div>
+            </div>
+          </div>
+          <div class="card size-md">
+            <img class="card-photo"
+                 src="https://images.unsplash.com/photo-0qkb5mfe68M?w=640&h=380&fit=crop&auto=format&q=80"
+                 alt="Gin">
+            <div class="card-ov">
+              <div class="card-name">Gin</div>
+              <div class="card-bot">
+                <div class="card-desc">Copa individual</div>
+                <div class="card-price amber">$8.000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="c-row">
+          <div class="card size-md">
+            <img class="card-photo"
+                 src="https://images.unsplash.com/photo-dmkmrNptMpw?w=640&h=380&fit=crop&auto=format&q=80"
+                 alt="Fernet">
+            <div class="card-ov">
+              <div class="card-name">Fernet</div>
+              <div class="card-bot">
+                <div class="card-desc">Copa individual</div>
+                <div class="card-price amber">$8.000</div>
+              </div>
+            </div>
+          </div>
+          <div class="card size-md">
+            <img class="card-photo"
+                 src="https://images.unsplash.com/photo-UyF3Tal_KXw?w=640&h=380&fit=crop&auto=format&q=80"
+                 alt="Jäger">
+            <div class="card-ov">
+              <div class="card-name">Jäger</div>
+              <div class="card-bot">
+                <div class="card-desc">Copa individual</div>
+                <div class="card-price amber">$10.000</div>
+              </div>
+            </div>
+          </div>
+          <div class="card size-md">
+            <img class="card-photo"
+                 src="https://images.unsplash.com/photo-TSkUCyCuVH4?w=640&h=380&fit=crop&auto=format&q=80"
+                 alt="Vodka">
+            <div class="card-ov">
+              <div class="card-name">Vodka</div>
+              <div class="card-bot">
+                <div class="card-desc">Copa individual</div>
+                <div class="card-price amber">$6.000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────────────────────────────────────────────
+         SLIDE 5 · CERVEZAS & BEBIDAS (5 tarjetas)
+    ─────────────────────────────────────────────────────── -->
+    <div class="slide" data-badge="Cervezas &amp; Bebidas" data-badge-class="amber">
+      <div class="s-head">
+        <div class="s-head-text">
+          <div class="s-eyebrow amber">✦ &nbsp; Para Refrescarte &nbsp; ✦</div>
+          <div class="s-title">Cervezas &amp; Bebidas</div>
+        </div>
+        <div class="s-line"></div>
+      </div>
+      <div class="c-row">
+
+        <div class="card size-md">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-Lq1rOaigDoY?w=420&h=780&fit=crop&auto=format&q=80"
+               alt="Porrón Corona">
+          <div class="card-ov">
+            <div class="card-name">Porrón Corona / Heineken</div>
+            <div class="card-bot">
+              <div class="card-desc">330 ml · bien fría</div>
+              <div class="card-price amber">$7.000</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card size-md">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-3ORoQEJY9LA?w=420&h=780&fit=crop&auto=format&q=80"
+               alt="Corona 710">
+          <div class="card-ov">
+            <div class="card-name">Corona 710</div>
+            <div class="card-bot">
+              <div class="card-desc">710 ml · bien fría</div>
+              <div class="card-price amber">$12.000</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card size-md">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-Qy2KMPRV3X4?w=420&h=780&fit=crop&auto=format&q=80"
+               alt="Coca Cola">
+          <div class="card-ov">
+            <div class="card-name">Coca Cola 1.25 L</div>
+            <div class="card-bot">
+              <div class="card-desc">Botella familiar</div>
+              <div class="card-price amber">$8.000</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card size-md">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-xBFTjrMIC0c?w=420&h=780&fit=crop&auto=format&q=80"
+               alt="Gaseosa y Red Bull">
+          <div class="card-ov">
+            <div class="card-name">Lata Gaseosa / Speed / Red Bull</div>
+            <div class="card-bot">
+              <div class="card-desc">Desde $3.000</div>
+              <div class="card-price amber">$3 – 7k</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card size-md">
+          <img class="card-photo"
+               src="https://images.unsplash.com/photo-Qh60WfqX-vA?w=420&h=780&fit=crop&auto=format&q=80"
+               alt="Agua y Corona Cero">
+          <div class="card-ov">
+            <div class="card-name">Agua · Sifón · Corona Cero</div>
+            <div class="card-bot">
+              <div class="card-desc">Sin alcohol · Desde $3.000</div>
+              <div class="card-price amber">$3 – 7k</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- PROGRESS -->
+  <div class="progress-track"><div class="progress-fill" id="pFill"></div></div>
+
+  <!-- DOTS -->
+  <div class="dots" id="dots"></div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="ticker">
+      <span class="ticker-seg">
+        ✦ &nbsp;&nbsp; Pizzas al Horno &nbsp;·&nbsp; Hechas en el Momento &nbsp;·&nbsp; La Vieja Nevera &nbsp;·&nbsp; Carta de Tragos &nbsp;·&nbsp; Cervezas Bien Frías &nbsp;·&nbsp; Pingüino de Fernet &nbsp;·&nbsp; ✦ &nbsp;&nbsp; Pizzas al Horno &nbsp;·&nbsp; Hechas en el Momento &nbsp;·&nbsp; La Vieja Nevera &nbsp;·&nbsp; Carta de Tragos &nbsp;·&nbsp; Cervezas Bien Frías &nbsp;·&nbsp; Pingüino de Fernet &nbsp;·&nbsp; ✦ &nbsp;&nbsp; Pizzas al Horno &nbsp;·&nbsp; Hechas en el Momento &nbsp;·&nbsp; La Vieja Nevera &nbsp;·&nbsp; Carta de Tragos &nbsp;·&nbsp; Cervezas Bien Frías &nbsp;·&nbsp; Pingüino de Fernet &nbsp;·&nbsp;
+      </span>
+      <span class="ticker-seg" aria-hidden="true">
+        ✦ &nbsp;&nbsp; Pizzas al Horno &nbsp;·&nbsp; Hechas en el Momento &nbsp;·&nbsp; La Vieja Nevera &nbsp;·&nbsp; Carta de Tragos &nbsp;·&nbsp; Cervezas Bien Frías &nbsp;·&nbsp; Pingüino de Fernet &nbsp;·&nbsp; ✦ &nbsp;&nbsp; Pizzas al Horno &nbsp;·&nbsp; Hechas en el Momento &nbsp;·&nbsp; La Vieja Nevera &nbsp;·&nbsp; Carta de Tragos &nbsp;·&nbsp; Cervezas Bien Frías &nbsp;·&nbsp; Pingüino de Fernet &nbsp;·&nbsp; ✦ &nbsp;&nbsp; Pizzas al Horno &nbsp;·&nbsp; Hechas en el Momento &nbsp;·&nbsp; La Vieja Nevera &nbsp;·&nbsp; Carta de Tragos &nbsp;·&nbsp; Cervezas Bien Frías &nbsp;·&nbsp; Pingüino de Fernet &nbsp;·&nbsp;
+      </span>
+    </div>
+  </footer>
+
+</div><!-- /.screen -->
+
+<script>
+  /* Scale to fill any TV/screen */
+  function resize() {
+    const s = document.getElementById('screen');
+    const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    s.style.transform = `scale(${scale})`;
+    /* center if there's extra space */
+    s.style.marginLeft = Math.max(0, (window.innerWidth  - 1920 * scale) / 2) + 'px';
+    s.style.marginTop  = Math.max(0, (window.innerHeight - 1080 * scale) / 2) + 'px';
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* Slideshow */
+  const slides    = document.querySelectorAll('.slide');
+  const pFill     = document.getElementById('pFill');
+  const dotsEl    = document.getElementById('dots');
+  const badge     = document.getElementById('hdrBadge');
+  const DURATION  = 9000;
+
+  /* Build dots */
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    dotsEl.appendChild(d);
+  });
+  const dotNodes = dotsEl.querySelectorAll('.dot');
+
+  let current = 0;
+
+  function startProgress() {
+    pFill.style.transition = 'none';
+    pFill.style.width = '0%';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      pFill.style.transition = `width ${DURATION}ms linear`;
+      pFill.style.width = '100%';
+    }));
+  }
+
+  function showSlide(idx) {
+    slides[current].classList.remove('active');
+    dotNodes[current].classList.remove('on');
+    current = idx % slides.length;
+    slides[current].classList.add('active');
+    dotNodes[current].classList.add('on');
+
+    /* update header badge */
+    const b = slides[current].dataset.badge || '';
+    const bc = slides[current].dataset.badgeClass || '';
+    badge.textContent = b;
+    badge.className   = 'hdr-badge' + (b ? ' show' : '') + (bc ? ' ' + bc : '');
+
+    startProgress();
+  }
+
+  startProgress();
+  setInterval(() => showSlide(current + 1), DURATION);
+</script>
+</body>
+</html>
